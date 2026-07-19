@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exploratory Analyses Inspired by the Sabatino Lab</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.65; color: #1a1a1a; background: #fff; padding: 0 1rem; }
+.page { max-width: 680px; margin: 0 auto; padding: 3rem 0 5rem; }
+h1 { font-size: 1.55rem; line-height: 1.25; font-weight: bold; margin-bottom: 0.4rem; }
+h2 { font-size: 1.1rem; font-weight: bold; margin: 2.4rem 0 0.5rem; }
+p  { margin-bottom: 1rem; }
+a  { color: #1a1a1a; }
+.byline { color: #555; font-size: 0.9rem; margin-bottom: 2.4rem; font-family: system-ui, sans-serif; line-height: 1.6; }
+hr { border: none; border-top: 1px solid #ddd; margin: 2.4rem 0; }
+.section-nav { font-family: system-ui, sans-serif; font-size: 0.82rem; color: #888; margin-bottom: 2.4rem; }
+.section-nav a { color: #555; margin-right: 1rem; text-decoration: none; }
+.experiment { border-left: 3px solid #1a1a1a; padding-left: 1.2rem; margin: 1.5rem 0; }
+.exp-label { font-family: system-ui, sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #777; margin-bottom: 0.3rem; }
+.exp-title { font-weight: bold; font-size: 1rem; margin-bottom: 0.6rem; }
+.metric-row { display: flex; gap: 2rem; margin: 1rem 0; flex-wrap: wrap; font-family: system-ui, sans-serif; }
+.metric { display: flex; flex-direction: column; }
+.metric-val { font-size: 1.5rem; font-weight: bold; line-height: 1; }
+.metric-desc { color: #666; font-size: 0.8rem; margin-top: 0.15rem; }
+.label-inline { font-family: system-ui, sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; color: #888; margin: 0.4rem 0; display: block; }
+figcaption { font-family: system-ui, sans-serif; font-size: 0.78rem; color: #777; margin-top: 0.5rem; line-height: 1.45; }
+.panel { border: 1px solid #e0e0e0; border-radius: 2px; padding: 1rem 1.1rem; margin: 1rem 0; background: #fcfcfc; }
+.controls { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.8rem; }
+.tgl { background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 4px 10px; font-family: system-ui, sans-serif; font-size: 0.78rem; cursor: pointer; color: #555; }
+.tgl.active { background: #5b3a8c; color: #fff; border-color: #5b3a8c; }
+#track { width: 100%; display: block; }
+.slider-row { display:flex; align-items:center; gap:10px; margin:0.6rem 0; font-family:system-ui,sans-serif; font-size:0.8rem; color:#444; }
+.slider-row input[type=range]{ flex:1; accent-color:#5b3a8c; }
+.matchtbl { font-family: 'Courier New', monospace; font-size: 0.82rem; width: 100%; border-collapse: collapse; margin-top: 0.6rem; }
+.matchtbl th { font-family: system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #888; text-align: left; padding: 3px 8px; border-bottom: 1px solid #ddd; }
+.matchtbl td { padding: 4px 8px; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+.al { letter-spacing: 1px; }
+.al .m { color: #1a7a4a; font-weight: 700; }
+.al .x { color: #bbb; }
+.badge { font-family: system-ui, sans-serif; font-size: 0.68rem; padding: 1px 6px; border-radius: 8px; }
+.badge.val { background: #e3f0e8; color: #1a7a4a; }
+.badge.new { background: #efe6f5; color: #5b3a8c; }
+.readout { font-family: system-ui, sans-serif; font-size: 0.85rem; background: #f1ecf6; border-radius: 3px; padding: 0.6rem 0.85rem; margin-top: 0.6rem; line-height:1.5; }
+.readout b { color: #5b3a8c; }
+.note { font-size: 0.82rem; color: #666; font-family: system-ui, sans-serif; margin-top: 0.6rem; }
+#tooltip { position: fixed; pointer-events: none; background: #1a1a1a; color: #fff; border-radius: 3px; padding: 6px 10px; font-family: 'Courier New', monospace; font-size: 0.76rem; z-index: 100; display: none; line-height: 1.5; }
+footer { font-family: system-ui, sans-serif; font-size: 0.82rem; color: #888; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #eee; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="tooltip"></div>
+<div class="page">
+
+  <h1>Exploratory Analyses Inspired by the Sabatino Lab</h1>
+  <div class="byline">
+    Cathy Liu &nbsp;&middot;&nbsp; Computational Immunology &nbsp;&middot;&nbsp; cathyliu014@gmail.com<br>
+    Prepared for the Sabatino Lab, UCSF Weill Institute for Neurosciences<br>
+    Personal exploratory project, July 2026
+  </div>
+
+  <div class="section-nav">
+    <a href="#motivation">Motivation</a>
+    <a href="#a1">Scanner</a>
+    <a href="#a2">Candidates</a>
+    <a href="#relevance">Relevance</a>
+  </div>
+
+  <p>
+    Multiple sclerosis is now firmly tied to Epstein-Barr virus, and the lab works to find the antigen targets of
+    the CD8 T cells that expand inside MS lesions. One leading explanation is molecular mimicry: immune cells
+    raised against an EBV protein cross-react with a brain protein because the two share a short stretch of
+    sequence. The clearest example is EBNA1, the EBV nuclear antigen, whose region near residues 386 to 405 is
+    mimicked by the brain adhesion protein GlialCAM.
+  </p>
+  <p>
+    That made me want to ask a simple question from sequence alone. Where else along EBNA1 does the virus resemble
+    a brain protein closely enough to matter? Below I scan EBNA1 against a panel of the CNS proteins most often
+    implicated in MS, recover the mimics that are already validated as a check, and flag the strongest new
+    candidates.
+  </p>
+
+  <hr id="motivation">
+
+  <h2>How the scan works</h2>
+  <p>
+    A T cell reads a short peptide, roughly eight or nine amino acids, held on an MHC molecule. So I slide a
+    window of that size along EBNA1 and along each brain protein, and score every possible pairing with BLOSUM62,
+    the standard substitution matrix that rates how interchangeable two amino acids are. High-scoring pairs are
+    stretches where the virus and the brain protein look alike. The regions already shown to cross-react serve as
+    positive controls: if the method is sound, they should rise to the top.
+  </p>
+
+  <hr id="a1">
+
+  <h2>Analysis 1 &mdash; Scan EBNA1 against the CNS antigen panel</h2>
+  <div class="experiment">
+    <div class="exp-label">Method</div>
+    <div class="exp-title">Sliding-window BLOSUM62 similarity between EBNA1 and each brain protein</div>
+    <p style="margin-top:0.6rem; font-size:0.92rem;">
+      Pick a brain protein. The track shows, for every position along EBNA1, how closely its best window matches
+      that protein. Peaks are candidate mimicry sites. The table lists the top matched peptide pairs, with shared
+      residues in green. Validated regions are marked so you can see the scan recover them.
+    </p>
+  </div>
+
+  <div class="panel">
+    <div class="controls" id="ag-buttons"></div>
+    <svg id="track" viewBox="0 0 1000 210" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="slider-row">
+      <span>Window</span>
+      <button class="tgl" onclick="setWin(6)" id="w6">6</button>
+      <button class="tgl active" onclick="setWin(7)" id="w7">7</button>
+      <button class="tgl" onclick="setWin(8)" id="w8">8</button>
+      <span style="margin-left:14px">Min identity</span>
+      <input type="range" id="idthr" min="3" max="7" step="1" value="4">
+      <span id="idthr-val" style="width:60px">4 / win</span>
+    </div>
+    <div class="readout" id="readout"></div>
+    <table class="matchtbl" id="matchtbl">
+      <thead><tr><th>EBNA1</th><th>alignment</th><th>brain protein</th><th>id</th><th></th></tr></thead>
+      <tbody id="match-body"></tbody>
+    </table>
+    <figcaption>Sequences from UniProt: EBNA1 (P03211) vs GlialCAM (Q14CZ8), MBP (P02686), CRYAB (P02511), ANO2 (Q9NQ90), MOG (Q16653), MAG (P20916), PLP1 (P60201).</figcaption>
+  </div>
+
+  <div class="metric-row">
+    <div class="metric"><span class="metric-val" id="m-top">GSPPRRP</span><span class="metric-desc" id="m-top-d">top EBNA1 peptide</span></div>
+    <div class="metric"><span class="metric-val" id="m-id">5 / 7</span><span class="metric-desc">best identity</span></div>
+    <div class="metric"><span class="metric-val" id="m-val">yes</span><span class="metric-desc">in validated region</span></div>
+  </div>
+
+  <hr id="a2">
+
+  <h2>Analysis 2 &mdash; What the scan recovers, and what is new</h2>
+  <div class="experiment">
+    <div class="exp-label">Result</div>
+    <div class="exp-title">Validated mimics as controls, plus two strong new candidates</div>
+  </div>
+  <p>
+    Using the panel at a 7-residue window, the scan cleanly recovers the mimics that are already published. The
+    GlialCAM match sits right in the validated EBNA1 386 to 405 region. The alpha-B-crystallin match is the
+    RRPFF motif at CRYAB residues 11 to 15, inside the validated 7 to 16 epitope. The myelin basic protein match
+    is a proline-rich stretch next to its known cross-reactive region.
+  </p>
+  <p>
+    Two candidates stand out that are not the usual ones. EBNA1 near residue 575 matches
+    <b>MOG</b> at ELLKDAI with six of seven residues identical, and EBNA1 near residue 500 matches
+    <b>MAG</b> at DEGTWV with six of seven. Both MOG and MAG are well-known MS autoantigens, so a close linear
+    match to EBNA1 is worth a direct test: synthesize the paired peptides and ask whether a single T cell clone
+    responds to both.
+  </p>
+
+  <hr id="relevance">
+
+  <h2>Why this matters for the lab</h2>
+  <p>
+    The lab already has the hard part, the T cell receptors that are clonally expanded in patients. A sequence
+    scan like this narrows the space of candidate antigens those receptors might see, turning an open-ended search
+    into a short ranked list of EBV and brain peptide pairs to test in a binding or activation assay. The method
+    extends directly to the lab's setting: restrict the windows to peptides that a patient's HLA can present, and
+    rank by both similarity and predicted binding.
+  </p>
+
+  <h2>What I would bring</h2>
+  <p>
+    My background is in computational biology and sequence analysis. I am comfortable pulling and aligning protein
+    sequences, working with substitution matrices and epitope prediction, and building small tools that make a
+    screen easy to inspect and reproduce. I would be glad to connect this to the lab's TCR sequencing and antigen
+    discovery work, and to help prioritize candidates for the bench.
+  </p>
+
+  <h2>Methods note</h2>
+  <p style="font-size:0.9rem; color:#444;">
+    Sequences were downloaded from UniProt (accessions above). For a chosen window size, every window of EBNA1 is
+    scored against every window of each brain protein using BLOSUM62, and the best-scoring pairs are reported with
+    percent identity. Validated regions are drawn from published cross-reactivity studies (EBNA1 386 to 405 with
+    GlialCAM; the RRPFF motif with alpha-B-crystallin 7 to 16; EBNA1 411 to 426 with myelin basic protein).
+    Linear similarity is a screen, not proof. Real T cell cross-reactivity also depends on MHC presentation and on
+    which residues the receptor contacts, so these are prioritized candidates for experimental testing, not
+    confirmed targets.
+  </p>
+
+  <footer>
+    Cathy Liu &nbsp;&middot;&nbsp; cathyliu014@gmail.com &nbsp;&middot;&nbsp; 415-216-3799<br>
+    Epilepsy neurostimulation project, <a href="https://arxiv.org/abs/2606.04339">arXiv:2606.04339</a>
+  </footer>
+
+</div>
+
+<script>
+const SEQ = {"EBNA1":"MSDEGPGTGPGNGLGEKGDTSGPEGSGGSGPQRRGGDNHGRGRGRGRGRGGGRPGAPGGSGSGPRHRDGVRRPQKRPSCIGCKGTHGGTGAGAGAGGAGAGGAGAGGGAGAGGGAGGAGGAGGAGAGGGAGAGGGAGGAGGAGAGGGAGAGGGAGGAGAGGGAGGAGGAGAGGGAGAGGGAGGAGAGGGAGGAGGAGAGGGAGAGGAGGAGGAGAGGAGAGGGAGGAGGAGAGGAGAGGAGAGGAGAGGAGGAGAGGAGGAGAGGAGGAGAGGGAGGAGAGGGAGGAGAGGAGGAGAGGAGGAGAGGAGGAGAGGGAGAGGAGAGGGGRGRGGSGGRGRGGSGGRGRGGSGGRRGRGRERARGGSRERARGRGRGRGEKRPRSPSSQSSSSGSPPRRPPPGRRPFFHPVGEADYFEYHQEGGPDGEPDVPPGAIEQGPADDPGEGPSTGPRGQGDGGRRKKGGWFGKHRGQGGSNPKFENIAEGLRALLARSHVERTTDEGTWVAGVFVYGGSKTSLYNLRRGTALAIPQCRLTPLSRLPFGMAPGPGPQPGPLRESIVCYFMVFLQTHIFAEVLKDAIKDLVMTKPAPTCNIRVTVCSFDDGVDLPPWFPPMVEGAAAEGDDGDDGDEGGDGDEGEEGQE","GlialCAM":"MKRERGALSRASRALRLAPFVYLLLIQTDPLEGVNITSPVRLIHGTVGKSALLSVQYSSTSSDRPVVKWQLKRDKPVTVVQSIGTEVIGTLRPDYRDRIRLFENGSLLLSDLQLADEGTYEVEISITDDTFTGEKTINLTVDVPISRPQVLVASTTVLELSEAFTLNCSHENGTKPSYTWLKDGKPLLNDSRMLLSPDQKVLTITRVLMEDDDLYSCMVENPISQGRSLPVKITVYRRSSLYIILSTGGIFLLVTLVTVCACWKPSKRKQKKLEKQNSLEYMDQNDDRLKPEADTLPRSGEQERKNPMALYILKDKDSPETEENPAPEPRSATEPGPPGYSVSPAVPGRSPGLPIRSARRYPRSPARSPATGRTHSSPPRAPSSPGRSRSASRTLRTAGVHIIREQDEAGPVEISA","MBP":"MGNHAGKRELNAEKASTNSETNRGESEKKRNLGELSRTTSEDNEVFGEADANQNNGTSSQDTAVTDSKRTADPKNAWQDAHPADPGSRPHLIRLFSRDAPGREDNTFKDRPSESDELQTIQEDSAATSESLDVMASQKRPSQRHGSKYLATASTMDHARHGFLPRHRDTGILDSIGRFFGGDRGAPKRGSGKDSHHPARTAHYGSLPQKSHGRTQDENPVVHFFKNIVTPRTPPPSQGKGRGLSLSRFSWGAEGQRPGFGYGGRASDYKSAHKGFKGVDAQGTLSKIFKLGGRDSRSGSPMARR","ANO2":"MATPGPRDIPLLPGSPRRLSPQAGSRGGQGPKHGQQCLKMPGPRAPGLQGGSNRDPGQPCGGESTRSSSVINNYLDANEPVSLEARLSRMHFHDSQRKVDYVLAYHYRKRGVHLAQGFPGHSLAIVSNGETGKEPHAGGPGDIELGPLDALEEERKEQREEFEHNLMEAGLELEKDLENKSQGSIFVRIHAPWQVLAREAEFLKIKVPTKKMYEIKAGGSIAKKFSAALQKLSSHLQPRVPEHSNNKMKNLSYPFSREKMYLYNIQEKDTFFDNATRSRIVHEILKRTACSRANNTMGINSLIANNIYEAAYPLHDGEYDSPEDDMNDRKLLYQEWARYGVFYKFQPIDLIRKYFGEKIGLYFAWLGLYTSFLIPSSVIGVIVFLYGCATIEEDIPSREMCDQQNAFTMCPLCDKSCDYWNLSSACGTAQASHLFDNPATVFFSIFMALWATMFLENWKRLQMRLGYFWDLTGIEEEEEHSRPEYETKVREKMLKESNQSAVQKLETNTTECGDEDDEDKLTWKDRFPGYLMNFASILFMIALTFSIVFGVIVYRITTAAALSLNKATRSNVRVTVTATAVIINLVVILILDEIYGAVAKWLTKIEVPKTEQTFEERLILKAFLLKFVNAYSPIFYVAFFKGRFVGRPGSYVYVFDGYRMEECAPGGCLMELCIQLSIIMLGKQLIQNNIFEIGVPKLKKLFRKLKDETEAGETDSAHSKHPEQWDLDYSLEPYTGLTPEYMEMIIQFGFVTLFVASFPLAPVFALLNNVIEVRLDAKKFVTELRRPDAVRTKDIGIWFDILSGIGKFSVISNAFVIAITSDFIPRLVYQYSYSHNGTLHGFVNHTLSFFNVSQLKEGTQPENSQFDQEVQFCRFKDYREPPWAPNPYEFSKQYWFILSARLAFVIIFQNLVMFLSVLVDWMIPDIPTDISDQIKKEKSLLVDFFLKEEHEKLKLMDEPALRSPGGGDRSRSRAASSAPSGQSQLGSMMSSGSQHTNV","CRYAB":"MDIAIHHPWIRRPFFPFHSPSRLFDQFFGEHLLESDLFPTSTSLSPFYLRPPSFLRAPSWFDTGLSEMRLEKDRFSVNLDVKHFSPEELKVKVLGDVIEVHGKHEERQDEHGFISREFHRKYRIPADVDPLTITSSLSSDGVLTVNGPRKQVSGPERTIPITREEKPAVTAAPKK","MOG":"MASLSRPSLPSCLCSFLLLLLLQVSSSYAGQFRVIGPRHPIRALVGDEVELPCRISPGKNATGMEVGWYRPPFSRVVHLYRNGKDQDGDQAPEYRGRTELLKDAIGEGKVTLRIRNVRFSDEGGFTCFFRDHSYQEEAAMELKVEDPFYWVSPGVLVLLAVLPVLLLQITVGLIFLCLQYRLRGKLRAEIENLHRTFDPHFLRVPCWKITLFVIVPVLGPLVALIICYNWLHRRLAGQFLEELRNPF","PLP1":"MGLLECCARCLVGAPFASLVATGLCFFGVALFCGCGHEALTGTEKLIETYFSKNYQDYEYLINVIHAFQYVIYGTASFFFLYGALLLAEGFYTTGAVRQIFGDYKTTICGKGLSATVTGGQKGRGSRGQHQAHSLERVCHCLGKWLGHPDKFVGITYALTVVWLLVFACSAVPVYIYFNTWTTCQSIAFPSKTSASIGSLCADARMYGVLPWNAFPGKVCGSNLLSICKTAEFQMTFHLFIAAFVGAAATLVSLLTFMIAATYNFAVLKLMGRGTKF","MAG":"MIFLTALPLFWIMISASRGGHWGAWMPSSISAFEGTCVSIPCRFDFPDELRPAVVHGVWYFNSPYPKNYPPVVFKSRTQVVHESFQGRSRLLGDLGLRNCTLLLSNVSPELGGKYYFRGDLGGYNQYTFSEHSVLDIVNTPNIVVPPEVVAGTEVEVSCMVPDNCPELRPELSWLGHEGLGEPAVLGRLREDEGTWVQVSLLHFVPTREANGHRLGCQASFPNTTLQFEGYASMDVKYPPVIVEMNSSVEAIEGSHVSLLCGADSNPPPLLTWMRDGTVLREAVAESLLLELEEVTPAEDGVYACLAENAYGQDNRTVGLSVMYAPWKPTVNGTMVAVEGETVSILCSTQSNPDPILTIFKEKQILSTVIYESELQLELPAVSPEDDGEYWCVAENQYGQRATAFNLSVEFAPVLLLESHCAAARDTVQCLCVVKSNPEPSVAFELPSRNVTVNESEREFVYSERSGLVLTSILTLRGQAQAPPRVICTARNLYGAKSLELPFQGAHRLMWAKIGPVGAVVAFAILIAIVCYITQTRRKKNVTESPSFSAGDNPPVLFSSDFRISGAPEKYESERRLGSERRLLGLRGEPPELDLSYSHSDLGKRPTKDSYTLTEELAEYAEIRVK"}
+;
+// BLOSUM62
+const AA="ARNDCQEGHILKMFPSTWYV";
+const B62S=`4 -1 -2 -2 0 -1 -1 0 -2 -1 -1 -1 -1 -2 -1 1 0 -3 -2 0
+-1 5 0 -2 -3 1 0 -2 0 -3 -2 2 -1 -3 -2 -1 -1 -3 -2 -3
+-2 0 6 1 -3 0 0 0 1 -3 -3 0 -2 -3 -2 1 0 -4 -2 -3
+-2 -2 1 6 -3 0 2 -1 -1 -3 -4 -1 -3 -3 -1 0 -1 -4 -3 -3
+0 -3 -3 -3 9 -3 -4 -3 -3 -1 -1 -3 -1 -2 -3 -1 -1 -2 -2 -1
+-1 1 0 0 -3 5 2 -2 0 -3 -2 1 0 -3 -1 0 -1 -2 -1 -2
+-1 0 0 2 -4 2 5 -2 0 -3 -3 1 -2 -3 -1 0 -1 -3 -2 -2
+0 -2 0 -1 -3 -2 -2 6 -2 -4 -4 -2 -3 -3 -2 0 -2 -2 -3 -3
+-2 0 1 -1 -3 0 0 -2 8 -3 -3 -1 -2 -1 -2 -1 -2 -2 2 -3
+-1 -3 -3 -3 -1 -3 -3 -4 -3 4 2 -3 1 0 -3 -2 -1 -3 -1 3
+-1 -2 -3 -4 -1 -2 -3 -4 -3 2 4 -2 2 0 -3 -2 -1 -2 -1 1
+-1 2 0 -1 -3 1 1 -2 -1 -3 -2 5 -1 -3 -1 0 -1 -3 -2 -2
+-1 -1 -2 -3 -1 0 -2 -3 -2 1 2 -1 5 0 -2 -1 -1 -1 -1 1
+-2 -3 -3 -3 -2 -3 -3 -3 -1 0 0 -3 0 6 -4 -2 -2 1 3 -1
+-1 -2 -2 -1 -3 -1 -1 -2 -2 -3 -3 -1 -2 -4 7 -1 -1 -4 -3 -2
+1 -1 1 0 -1 0 0 0 -1 -2 -2 0 -1 -2 -1 4 1 -3 -2 -2
+0 -1 0 -1 -1 -1 -1 -2 -2 -1 -1 -1 -1 -2 -1 1 5 -2 -2 0
+-3 -3 -4 -4 -2 -2 -3 -2 -2 -3 -2 -3 -1 1 -4 -3 -2 11 2 -3
+-2 -2 -2 -3 -2 -1 -2 -3 2 -1 -1 -2 -1 3 -3 -2 -2 2 7 -1
+0 -3 -3 -3 -1 -2 -2 -3 -3 3 1 -2 1 -1 -2 -2 0 -3 -1 4`;
+const IDX={}; for(let i=0;i<AA.length;i++) IDX[AA[i]]=i;
+const M=B62S.split('\n').map(r=>r.trim().split(/\s+/).map(Number));
+function s2(a,b){ const i=IDX[a],j=IDX[b]; return (i==null||j==null)?-4:M[i][j]; }
+
+const PANEL=['GlialCAM','MBP','CRYAB','ANO2','MOG','MAG','PLP1'];
+// validated EBNA1 regions (1-based) per antigen
+const VALID={ GlialCAM:[[386,405]], MBP:[[411,426]], CRYAB:[[399,408]], ANO2:[[411,440]] };
+let curAg='GlialCAM', win=7, idThr=4;
+
+const E=SEQ.EBNA1;
+function scanAg(ag){
+  const b=SEQ[ag]; const bestPos=new Array(E.length-win+1).fill(-99); const pairs=[];
+  for(let i=0;i<=E.length-win;i++){
+    let bs=-99, bj=-1;
+    const wa=E.substr(i,win);
+    for(let j=0;j<=b.length-win;j++){
+      let s=0; for(let k=0;k<win;k++){ s+=s2(wa[k],b[j+k]); }
+      if(s>bs){ bs=s; bj=j; }
+    }
+    bestPos[i]=bs;
+    const wb=b.substr(bj,win);
+    let id=0; for(let k=0;k<win;k++) if(wa[k]===wb[k]) id++;
+    pairs.push({ei:i+1,ej:bj+1,wa,wb,score:bs,id});
+  }
+  return {bestPos, pairs};
+}
+
+const NS='http://www.w3.org/2000/svg';
+const track=document.getElementById('track');
+const tip=document.getElementById('tooltip');
+function el(t,a={}){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+
+function inValid(pos){
+  const vs=VALID[curAg]; if(!vs) return false;
+  return vs.some(([a,b])=>pos>=a-3 && pos<=b+3);
+}
+
+function render(){
+  const {bestPos,pairs}=scanAg(curAg);
+  // track
+  while(track.firstChild) track.removeChild(track.firstChild);
+  const W=1000,H=210,padL=8,padR=8,plot=150,base=170;
+  const L=E.length;
+  const xOf=p=>padL+(p/L)*(W-padL-padR);
+  const mx=Math.max(...bestPos), mn=Math.min(...bestPos);
+  // validated bands
+  (VALID[curAg]||[]).forEach(([a,b])=>{
+    track.appendChild(el('rect',{x:xOf(a),y:8,width:xOf(b)-xOf(a),height:base-8,fill:'#e3f0e8'}));
+    const t=el('text',{x:(xOf(a)+xOf(b))/2,y:20,'text-anchor':'middle','font-family':'system-ui','font-size':11,fill:'#1a7a4a'}); t.textContent='validated'; track.appendChild(t);
+  });
+  // similarity area
+  let d='M '+xOf(0)+' '+base+' ';
+  for(let i=0;i<bestPos.length;i++){ const x=xOf(i+win/2); const y=base-((bestPos[i]-mn)/(mx-mn||1))*plot; d+='L '+x.toFixed(1)+' '+y.toFixed(1)+' '; }
+  d+='L '+xOf(L)+' '+base+' Z';
+  track.appendChild(el('path',{d,fill:'#c9b8e0',stroke:'#5b3a8c','stroke-width':1}));
+  // peaks: top 6 by identity>=idThr
+  const strong=pairs.filter(p=>p.id>=idThr).sort((a,b)=>b.score-a.score).slice(0,6);
+  strong.forEach(p=>{ const x=xOf(p.ei+win/2-1); const y=base-((p.score-mn)/(mx-mn||1))*plot;
+    const c=el('circle',{cx:x,cy:y,r:4,fill:inValid(p.ei)?'#1a7a4a':'#5b3a8c',cursor:'pointer'});
+    c.addEventListener('mousemove',e=>{ tip.style.display='block'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML=`EBNA1 ${p.ei}-${p.ei+win-1} ${p.wa}<br>${curAg} ${p.ej}-${p.ej+win-1} ${p.wb}<br>identity ${p.id}/${win}`; });
+    c.addEventListener('mouseleave',()=>tip.style.display='none');
+    track.appendChild(c);
+  });
+  // axis
+  track.appendChild(el('line',{x1:padL,y1:base,x2:W-padR,y2:base,stroke:'#ccc'}));
+  for(let p=0;p<=600;p+=100){ if(p>L)break; const x=xOf(p);
+    const t=el('text',{x,y:base+16,'text-anchor':'middle','font-family':'system-ui','font-size':10,fill:'#aaa'}); t.textContent=p; track.appendChild(t); }
+  const lab=el('text',{x:padL,y:base+34,'font-family':'system-ui','font-size':11,fill:'#888'}); lab.textContent='EBNA1 residue  —  similarity to '+curAg+' (higher = closer match)'; track.appendChild(lab);
+
+  // match table
+  const tb=document.getElementById('match-body'); tb.innerHTML='';
+  strong.forEach(p=>{
+    let al=''; for(let k=0;k<win;k++){ const same=p.wa[k]===p.wb[k]; al+=`<span class="${same?'m':'x'}">${p.wa[k]}</span>`; }
+    const isVal=inValid(p.ei);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${p.ei}-${p.ei+win-1}</td><td class="al">${al}</td><td>${curAg} ${p.ej}</td><td>${p.id}/${win}</td>`+
+      `<td>${isVal?'<span class="badge val">validated</span>':(p.id>=6?'<span class="badge new">strong</span>':'')}</td>`;
+    tb.appendChild(tr);
+  });
+
+  // metrics + readout
+  const top=strong[0]||pairs.slice().sort((a,b)=>b.score-a.score)[0];
+  document.getElementById('m-top').textContent=top.wa;
+  document.getElementById('m-top-d').textContent=`EBNA1 ${top.ei}-${top.ei+win-1}`;
+  document.getElementById('m-id').textContent=top.id+' / '+win;
+  document.getElementById('m-val').textContent=inValid(top.ei)?'yes':'—';
+  const nStrong=pairs.filter(p=>p.id>=idThr).length;
+  document.getElementById('readout').innerHTML=`EBNA1 vs <b>${curAg}</b>, window ${win}, at least ${idThr}/${win} identical: `+
+    `<b>${nStrong}</b> matching window${nStrong===1?'':'s'}. Best pair <b>${top.wa}</b> vs <b>${top.wb}</b> (${top.id}/${win} identical`+
+    `${inValid(top.ei)?', inside a validated region':''}).`;
+}
+
+// buttons
+const agb=document.getElementById('ag-buttons');
+PANEL.forEach(a=>{ const b=document.createElement('button'); b.className='tgl'+(a===curAg?' active':''); b.textContent=a; b.dataset.a=a;
+  b.onclick=()=>{ curAg=a; document.querySelectorAll('#ag-buttons .tgl').forEach(x=>x.classList.toggle('active',x.dataset.a===a)); render(); };
+  agb.appendChild(b); });
+function setWin(w){ win=w; ['w6','w7','w8'].forEach(id=>document.getElementById(id).classList.toggle('active',id==='w'+w)); render(); }
+document.getElementById('idthr').addEventListener('input',e=>{ idThr=+e.target.value; document.getElementById('idthr-val').textContent=idThr+' / win'; render(); });
+render();
+</script>
+</body>
+</html>
